@@ -33,7 +33,8 @@ namespace HttpDisplay.ConApp
 
                 Console.WriteLine($"Received {request.HttpMethod} request for {request.Url}");
 
-                // Check if PRINT: OFF is in headers
+                // Check if DISPLAY: CLEAR or PRINT: OFF is in headers
+                bool shouldClear = false;
                 bool shouldPrint = true;
 
                 if (request?.Headers?.AllKeys != null)
@@ -42,13 +43,25 @@ namespace HttpDisplay.ConApp
                     {
                         string headerValue = request.Headers[key] ?? "";
 
-                        if (key.Equals("PRINT", StringComparison.OrdinalIgnoreCase) &&
+                        if (key.Equals("DISPLAY", StringComparison.OrdinalIgnoreCase) &&
+                                 headerValue.Equals("CLEAR", StringComparison.OrdinalIgnoreCase))
+                        {
+                            shouldClear = true;
+                        }
+                        else if (key.Equals("PRINT", StringComparison.OrdinalIgnoreCase) &&
                             headerValue.Equals("OFF", StringComparison.OrdinalIgnoreCase))
                         {
                             shouldPrint = false;
-                            break;
                         }
                     }
+                }
+
+                if (shouldClear)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Listening on http://localhost:8080/ ...");
+                    Console.WriteLine("(Console cleared - DISPLAY: CLEAR found)");
+                    Console.WriteLine();
                 }
 
                 if (shouldPrint)
@@ -71,9 +84,10 @@ namespace HttpDisplay.ConApp
                 // Read and display request body
                 if (request != null && request.HasEntityBody && request.InputStream != null)
                 {
-                    using var reader = new System.IO.StreamReader(request.InputStream, request.ContentEncoding ?? System.Text.Encoding.UTF8);
+                    using var reader = new StreamReader(request.InputStream, request.ContentEncoding ?? System.Text.Encoding.UTF8);
                     string body = await reader.ReadToEndAsync();
-                    Console.WriteLine($"Body:");
+
+                    Console.WriteLine($"Body: ");
                     if (!string.IsNullOrEmpty(body))
                     {
                         Console.WriteLine($"  {body}");
