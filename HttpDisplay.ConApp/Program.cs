@@ -4,6 +4,7 @@ namespace HttpDisplay.ConApp
 {
     internal partial class Program
     {
+        static string url = "http://localhost:8080/";
         static DateTime lastRequestTime = DateTime.Now;
 
         static async Task Main(string[] args)
@@ -11,9 +12,9 @@ namespace HttpDisplay.ConApp
             var listener = new HttpListener();
 
             Console.Clear();
-            listener.Prefixes.Add("http://localhost:8080/");
+            listener.Prefixes.Add(url);
             listener.Start();
-            Console.WriteLine("Listening on http://localhost:8080/ ...");
+            Console.WriteLine($"Listening on {url} ...");
 
             while (true)
             {
@@ -21,11 +22,11 @@ namespace HttpDisplay.ConApp
                 var request = context.Request;
 
                 // Check if more than one minute has passed since last request
-                DateTime currentRequestTime = DateTime.Now;
+                var currentRequestTime = DateTime.Now;
                 if ((currentRequestTime - lastRequestTime).TotalMinutes > 1)
                 {
                     Console.Clear();
-                    Console.WriteLine("Listening on http://localhost:8080/ ...");
+                    Console.WriteLine($"Listening on {url} ...");
                     Console.WriteLine("(Console cleared - more than 1 minute since last request)");
                     Console.WriteLine();
                 }
